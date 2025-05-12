@@ -1,12 +1,13 @@
 {
   "name": "etherreq",
-  "version": "1.0.0",
+  "version": "1.0.10.9",
   "description": "A lightweight custom HTTP request library.",
   "main": "src/index.js",
+  "types": "src/types/etherreq.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["http", "request", "axios"],
-  "author": "Your Name <your.email@example.com>",
+  "keywords": ["http", "request"],
+  "author": "guochang2635@icloud.com",
   "license": "MIT"
 }

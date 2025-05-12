@@ -1,26 +1,36 @@
 // src/request.js
 import { create } from './myaxios';
 
+// 创建一个带有默认配置的请求实例
 const instance = create({
-  baseURL: 'https://api.example.com',
+  baseURL: 'https://api.example.com', // 默认基础 URL
 });
 
-// 请求拦截器 - 自动注入 token
+// 请求拦截器：自动注入 token 和 Content-Type
 instance.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
+
+  // 构建最终 headers
+  const headers = {
+    ...(config.headers || {}), // 用户自定义 headers
+    Authorization: token ? `Bearer ${token}` : undefined,
+  };
+
+  // 如果是 POST/PUT 等非 GET 请求，并且没有指定 Content-Type，则默认为 application/json
+  if (config.method !== 'GET' && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   return {
     ...config,
-    headers: {
-      ...(config.headers || {}),
-      Authorization: token ? `Bearer ${token}` : undefined,
-    },
+    headers,
   };
 });
 
-// 响应拦截器 - 返回 data
+// 响应拦截器：自动提取 response.data
 instance.interceptors.response.use(
   (response) => {
-    return response.data; // 自动提取 data
+    return response.data; // 返回 data 字段作为结果
   },
   (error) => {
     console.error('请求异常:', error);
@@ -28,9 +38,17 @@ instance.interceptors.response.use(
   }
 );
 
-export const request = (url, options) => {
+/**
+ * 封装 request 函数，支持 baseURl 拼接等逻辑
+ * @param {string} url - 请求路径
+ * @param {Object} options - 请求配置
+ */
+export const request = (url, options = {}) => {
+  const baseURL = options.baseURL || 'https://api.example.com';
+  const finalURL = new URL(url, baseURL).toString();
+
   return instance({
     ...options,
-    url: options.baseURL + url,
+    url: finalURL,
   });
 };
