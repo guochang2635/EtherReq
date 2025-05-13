@@ -1,5 +1,3 @@
-// src/types/etherreq.d.ts
-
 interface EtherRequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   headers?: Record<string, string | number | boolean>;
@@ -28,9 +26,16 @@ interface EtherreqStatic extends EtherRequestMethod {
   put: EtherRequestMethod;
   delete: EtherRequestMethod;
   del: EtherRequestMethod;
+  login: EtherRequestMethod; // 新增 login 类型
 }
 
 // 导出对象
 declare const etherreq: EtherreqStatic;
+
+declare module 'etherreq' {
+  export const etherreq: EtherreqStatic;
+  export let baseURL: string;
+  export function setBaseURL(url: string): void;
+}
 
 export { etherreq };

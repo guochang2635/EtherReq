@@ -38,17 +38,27 @@ instance.interceptors.response.use(
   }
 );
 
+let _baseURL = 'https://api.example.com'; // 内部变量用于保存 base URL
+
 /**
  * 封装 request 函数，支持 baseURl 拼接等逻辑
  * @param {string} url - 请求路径
  * @param {Object} options - 请求配置
  */
 export const request = (url, options = {}) => {
-  const baseURL = options.baseURL || 'https://api.example.com';
+  const baseURL = options.baseURL || _baseURL;
   const finalURL = new URL(url, baseURL).toString();
 
   return instance({
     ...options,
     url: finalURL,
   });
+};
+
+// 导出可读写的 baseURL 变量
+export { _baseURL as baseURL };
+
+// 允许外部设置 baseURL
+export const setBaseURL = (newBaseURL) => {
+  _baseURL = newBaseURL;
 };

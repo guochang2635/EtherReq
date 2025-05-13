@@ -1,9 +1,13 @@
-import { request } from './request';
+// src/index.js
+import { request, baseURL as _baseURL, setBaseURL } from './request';
 
+// 设置全局 base URL
+// setBaseURL('http://localhost:8081/api');
+
+// 示例封装方法
 const createMethod = (method) => (url, data, callback) => {
   let options;
 
-  // 如果 data 是普通对象（而不是包含 headers/body/method 的配置对象），则将其视为 body
   if (
     data &&
     typeof data === 'object' &&
@@ -36,5 +40,24 @@ export const etherreq = Object.assign(
     put: createMethod('PUT'),
     delete: createMethod('DELETE'),
     del: createMethod('DELETE'),
+    login: (url, data, callback) => {
+      const loginPromise = createMethod('POST')(url, data);
+
+      loginPromise.then(response => {
+        const token = response.data?.token;
+        if (token) {
+          localStorage.setItem('token', token); // 保存 token 到 localStorage
+        }
+        return response;
+      });
+
+      if (typeof callback === 'function') {
+        loginPromise.then(data => callback(null, data)).catch(err => callback(err, null));
+      } else {
+        return loginPromise;
+      }
+    },
   }
 );
+
+export { setBaseURL, _baseURL as baseURL };
