@@ -30,6 +30,18 @@ export const create = (defaultConfig = {}) => {
       const res = await fetch(url, options);
       const data = await res.json();
 
+      // 手动处理 HTTP 错误状态
+if (!res.ok) {
+  const error = new Error(`HTTP 错误: ${res.status} - ${res.statusText}`);
+  error.response = {
+    data,
+    status: res.status,
+    statusText: res.statusText,
+    headers: res.headers,
+  };
+  throw error;
+}
+
       response = {
         data,
         status: res.status,
@@ -70,6 +82,7 @@ export const create = (defaultConfig = {}) => {
       use: (fulfilled, rejected) => use(fulfilled, rejected, 'response'),
     },
   };
+
 
   return instance;
 };
