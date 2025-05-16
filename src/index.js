@@ -25,11 +25,11 @@ const createMethod = (method) => (url, data, callback) => {
 
   const promise = request(url, options);
 
-  if (typeof callback === 'function') {
-    promise.then(data => callback(null, data)).catch(err => callback(err, null));
-  } else {
-    return promise;
-  }
+if (typeof callback === 'function') {
+  promise.then(data => callback(null, data)).catch(err => callback(err, null));
+} else {
+  return promise;
+}
 };
 
 export const etherreq = Object.assign(

@@ -42,7 +42,6 @@ console.log(b1);
   };
 
 // 登录方法（自动保存 token）
-etherreq                                                                                                                                                                                                                                                             ;
   const login = async () => {
     const user={
     "id": 1,

@@ -1,24 +1,32 @@
 // src/request.js
-import { create } from './myaxios';
+import { create } from './etherreq';
+import { requestCache, getCacheKey } from './cache';
 
 // 创建一个带有默认配置的请求实例
 const instance = create({
   baseURL: 'https://api.example.com', // 默认基础 URL
 });
 
-// 请求拦截器：自动注入 token 和 Content-Type
+// 请求拦截器：自动注入 token、Content-Type 和缓存处理
 instance.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
 
-  // 构建最终 headers
   const headers = {
-    ...(config.headers || {}), // 用户自定义 headers
+    ...(config.headers || {}),
     Authorization: token ? `Bearer ${token}` : undefined,
+    'Content-Type': 'application/json',
   };
 
-  // 如果是 POST/PUT 等非 GET 请求，并且没有指定 Content-Type，则默认为 application/json
-  if (config.method !== 'GET' && !headers['Content-Type']) {
-    headers['Content-Type'] = 'application/json';
+  // GET 请求启用缓存
+  if (config.method === 'GET' && !config.disableCache) {
+    const cacheKey = getCacheKey(config.url, config);
+    const cached = requestCache.get(cacheKey);
+    console.log("缓存数据:",cached);
+
+    if (cached) {
+      console.log("缓存命中");
+      return Promise.resolve(cached); // 这里返回的就是 response.data
+    }
   }
 
   return {
@@ -27,17 +35,24 @@ instance.interceptors.request.use((config) => {
   };
 });
 
-// 响应拦截器：自动提取 response.data
+// 响应拦截器：自动提取 response.data 并写入缓存
 instance.interceptors.response.use(
   (response) => {
-    return response.data; // 返回 data 字段作为结果
+    const config = response.config;
+
+    if (config && config.method === 'GET' && !config.disableCache) {
+      const cacheKey = getCacheKey(config.url, config);
+      // ✅ 只缓存 response.data，避免缓存整个 response 对象
+      requestCache.set(cacheKey, response.data);
+    }
+
+    return response.data; // ✅ 正常请求也只返回 data 字段
   },
   (error) => {
     console.error('请求异常:', error);
     return Promise.reject(error);
   }
 );
-
 let _baseURL = 'https://api.example.com'; // 内部变量用于保存 base URL
 
 /**
