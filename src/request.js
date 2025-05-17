@@ -7,7 +7,7 @@ const instance = create({
   baseURL: 'https://api.example.com', // 默认基础 URL
 });
 
-// 请求拦截器：自动注入 token、Content-Type 和缓存处理
+// 请求拦截器
 instance.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
 
@@ -20,15 +20,15 @@ instance.interceptors.request.use((config) => {
   if (config.method === 'GET' && !config.disableCache) {
     const cacheKey = getCacheKey(config.url, config);
     const cached = requestCache.get(cacheKey);
+
     if (cached) {
-      const fakeResponse = {
+      return Promise.resolve({
         data: cached,
         status: 200,
         statusText: 'OK',
         config,
-        isFromCache: true, // ✅ 添加标志位
-      };
-      return Promise.resolve(fakeResponse); // ✅ 返回响应对象，中断请求链
+        isFromCache: true,
+      });
     }
   }
 
@@ -38,21 +38,19 @@ instance.interceptors.request.use((config) => {
   };
 });
 
-// 响应拦截器：自动提取 response.data 并写入缓存
+// 响应拦截器
 instance.interceptors.response.use(
-    (response) => {
-    // 判断是否是缓存返回的数据（没有 .config）
-    if (!response.config && response.data !== undefined) {
-      // 已经是 data，直接返回
-      return response;
+  (response) => {
+    if (response.isFromCache) {
+      return response.data;
     }
 
     const config = response.config;
-
     if (config && config.method === 'GET' && !config.disableCache) {
       const cacheKey = getCacheKey(config.url, config);
       requestCache.set(cacheKey, response.data);
     }
+
     return response.data;
   },
   (error) => {

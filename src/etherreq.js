@@ -18,7 +18,7 @@ const dispatchRequest = async (config) => {
     const nextConfig = await interceptor.fulfilled(config);
     // ✅ 拦截器可以返回一个 response 对象，表示中断请求
     if (nextConfig && nextConfig.isFromCache) {
-      return nextConfig; // ✅ 直接返回缓存结果，不再往下执行
+      return nextConfig.data; // ✅ 直接返回缓存结果，不再往下执行
     }
     config = nextConfig;
   }
