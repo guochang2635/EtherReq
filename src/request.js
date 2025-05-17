@@ -20,10 +20,7 @@ instance.interceptors.request.use((config) => {
   if (config.method === 'GET' && !config.disableCache) {
     const cacheKey = getCacheKey(config.url, config);
     const cached = requestCache.get(cacheKey);
-    console.log("缓存数据:", cached);
-
     if (cached) {
-      console.log("缓存命中");
       const fakeResponse = {
         data: cached,
         status: 200,

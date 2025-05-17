@@ -26,7 +26,6 @@ const dispatchRequest = async (config) => {
   let response;
   const { url, method = 'GET', headers = {}, body } = config;
   let text = '';
-
   try {
     const options = {
       method,
@@ -35,9 +34,7 @@ const dispatchRequest = async (config) => {
     };
 
     const res = await fetch(url, options);
-
     text = await res.text();
-
     if (!res.ok) {
       throw new Error(`HTTP 错误: ${res.status} - ${res.statusText}`);
     }
